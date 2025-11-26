@@ -61,6 +61,8 @@ typedef struct {
 
 //Function Prototypes
 uint8_t IMU_init();   // Returns IMU_OK, IMU_NOT_FOUND, etc.
+uint8_t IMU_readRegister(uint8_t reg);  //helper function to read a register
+void IMU_writeRegister(uint8_t reg, uint8_t value); //helper function to write to a register
 
 void IMU_readAccel(int16_t* x, int16_t* y, int16_t* z);
 void IMU_readGyro(int16_t* x, int16_t* y, int16_t* z);
