@@ -11,6 +11,8 @@
 
 //IMU Registers
 #define IMU_REG_DEVID      0x00      // Device ID register
+#define IMU_EXPECTED_DEVID 0xE5      // Expected device ID for ADXL345
+
 
 //Data Registers
 #define IMU_REG_DATAX0     0x32 
