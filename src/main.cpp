@@ -1,5 +1,7 @@
 #include <SPI.h>
 #include "IMU.h"
+#include <arduinoFFT.h>
+
 
 void setup() {
     Serial.begin(115200);
