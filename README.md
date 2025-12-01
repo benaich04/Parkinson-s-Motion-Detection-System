@@ -95,6 +95,88 @@ IMU → Buffer → Magnitude → Mean Removal → Smoothing → FFT Spectrum
 Standard PlatformIO project layout.
 
 ---
+30 November: 
+
+### **🆕 Added System Functionality**
+
+We have now fully implemented the **FFT + UI integration** with a **touch-enabled navigation system**:
+
+#### **1. Touchscreen Gesture Navigation**
+
+The TFT detects:
+
+* **Swipe Up → Diagnostics page**
+* **Swipe Down / Left / Right → reserved for future screens**
+
+The gesture engine analyzes ΔX/ΔY to determine the direction reliably.
+
+#### **2. Diagnostics Page (Swipe-Up Screen)**
+
+This page now displays **two real-time plots**:
+
+##### **(a) Processed Magnitude Plot (Time Domain)**
+
+* Streams in real-time using `plotNextSample()`
+* Shows the filtered magnitude over the last ~100 seconds
+* Fixed Y-axis (e.g., **0 → 200 units**) for consistent scaling
+* Grid + borders handled by `TFTHelpers`
+
+##### **(b) FFT Spectrum Plot (Frequency Domain)**
+
+* Uses the new `drawSpectrumBars()`
+* 1 bar per **1 Hz** for high resolution
+* Frequency range restricted to **0–10 Hz** for Parkinson’s detection
+* Uses a fixed amplitude scaling factor (no auto-scaling)
+* Updates only when a new FFT is available
+
+This creates a **technical “doctor mode”** page showing movement intensity and spectral peaks in real time.
+
+---
+
+### ** CSV + Python Preprocessing Validation**
+
+To verify correctness of the preprocessing stage:
+
+* We recorded raw XYZ data + MCU-processed magnitude into CSV
+* A Python script re-computes:
+
+  * magnitude
+  * DC offset removal
+  * moving average smoothing
+* It then plots:
+
+  * raw magnitudes
+  * MCU processed
+  * Python processed
+ 
+  <img width="3000" height="2400" alt="imu_mag_comparison" src="https://github.com/user-attachments/assets/ab90d4fa-c895-4106-9131-7909c5af010e" />
+
+**The Python outputs match the MCU**, confirming correct preprocessing.
+
+
+
+---
+
+### **🐛 RAM Issues + Fixes**
+
+We encountered RAM pressure due to the ATmega32U4’s **2.5 KB RAM limit**.
+The main RAM consumers were:
+
+1. **`BUFFER_SIZE`** (from `SAMPLE_RATE_HZ × WINDOW_SECONDS` in `Buffer.h`)
+2. **`FFT_SIZE`** (in `FFTModule.h`)
+
+Fixes applied:
+
+* Removed intermediate “buckets”
+* Wrote preprocessed data **directly** into FFT input buffer
+* Reduced unnecessary local arrays
+* Optimized FFT scratch buffers
+* Ensured all arrays are static and sized minimally
+
+System now runs FFT + UI in real time without memory overflow.
+
+
+---
 
 #  **Next Steps (In Order)**
 
