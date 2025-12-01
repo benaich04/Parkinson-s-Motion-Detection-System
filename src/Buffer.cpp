@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "IMU.h" 
+#include "IMU_I2C.h"
 #include "Buffer.h"
 
 

@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "IMU.h"
+#include "IMU_I2C.h"
 #include "Buffer.h"
 #include "Preprocess.h"
 
@@ -18,8 +18,14 @@ void preprocess_windowToMagnitude(const imu_sample_t* inWindow,
         int16_t y = inWindow[i].y;
         int16_t z = inWindow[i].z;
 
-        outSignal[i] = sqrtf((float)(x*x + y*y + z*z));
-        signal_sum += outSignal[i];
+        // *** FIX: cast to float BEFORE squaring to avoid 16-bit overflow ***
+        float fx = (float)x;
+        float fy = (float)y;
+        float fz = (float)z;
+
+        float mag = sqrtf(fx * fx + fy * fy + fz * fz);
+        outSignal[i] = mag;
+        signal_sum += mag;
     }
 
     // Compute mean
@@ -30,24 +36,44 @@ void preprocess_windowToMagnitude(const imu_sample_t* inWindow,
         outSignal[i] -= signal_mean;
     }
 
-    //moving average filter 
-    const uint8_t filterSize = FILTER_SIZE;
-    static float filteredSignal[BUFFER_SIZE];
-    for (uint16_t i = 0; i < length; i++) {
-        float sum = 0.0f;
-        uint8_t count = 0;
-        for (int8_t j = -filterSize/2; j <= filterSize/2; j++) {
-            int16_t idx = i + j;
-            if (idx >= 0 && idx < length) {
-                sum += outSignal[idx];
-                count++;
-            }
+    // // moving average filter 
+    // const uint8_t filterSize = FILTER_SIZE;
+    // static float filteredSignal[BUFFER_SIZE];
+    // for (uint16_t i = 0; i < length; i++) {
+    //     float sum = 0.0f;
+    //     uint8_t count = 0;
+    //     for (int8_t j = -filterSize/2; j <= filterSize/2; j++) {
+    //         int16_t idx = i + j;
+    //         if (idx >= 0 && idx < length) {
+    //             sum += outSignal[idx];
+    //             count++;
+    //         }
+    //     }
+    //     filteredSignal[i] = sum / (float)count;
+    // }
+
+    // // Copy filtered signal back to outSignal
+    // for (uint16_t i = 0; i < length; i++) {
+    //     outSignal[i] = filteredSignal[i];
+    // }
+
+
+    // moving average filter (in-place version)
+const uint8_t filterSize = FILTER_SIZE;
+
+for (uint16_t i = 0; i < length; i++) {
+    float sum = 0.0f;
+    uint8_t count = 0;
+
+    for (int8_t j = -filterSize/2; j <= filterSize/2; j++) {
+        int16_t idx = i + j;
+        if (idx >= 0 && idx < length) {
+            sum += outSignal[idx];
+            count++;
         }
-        filteredSignal[i] = sum / (float)count;
     }
-    // Copy filtered signal back to outSignal
-    for (uint16_t i = 0; i < length; i++) {
-        outSignal[i] = filteredSignal[i];
-    }
+
+    outSignal[i] = sum / (float)count;   // filter directly into outSignal
 }
 
+}

@@ -107,3 +107,81 @@ void LockScreen::update() {
         else fadeDirection = true;
     }
 }
+
+
+
+
+
+
+
+
+
+/*
+#include <Arduino.h>
+#include "LockScreen.h"
+#include "TFTHelpers.h"
+
+LockScreen::LockScreen(Adafruit_ILI9341* tft, UIDataModel* data)
+: tft(tft),
+  data(data),
+  fadeValue(0),
+  fadeDirection(true)
+{}
+
+void LockScreen::enter() {
+    drawFull();
+}
+
+void LockScreen::exit() {
+    // nothing needed
+}
+
+void LockScreen::drawFull() {
+    TFTHelpers::clear(*tft, ILI9341_BLACK);
+
+    // ----- TIME (large, centered) -----
+    char timeStr[6];
+    snprintf(timeStr, sizeof(timeStr), "%02u:%02u", data->hour, data->minute);
+    TFTHelpers::drawCenteredText(*tft, 40, timeStr, 4, ILI9341_WHITE);
+
+    // ----- DATE (under time) -----
+    char dateStr[16];
+    snprintf(dateStr, sizeof(dateStr), "%02u/%02u/%04u",
+             data->day, data->month, data->year);
+    TFTHelpers::drawCenteredText(*tft, 80, dateStr, 2, ILI9341_DARKGREY);
+
+    // ----- TITLE -----
+    TFTHelpers::drawCenteredText(*tft, 120, F("Parkinson Monitor"), 2, ILI9341_CYAN);
+
+    // ----- BATTERY (top-right) -----
+    char battStr[8];
+    snprintf(battStr, sizeof(battStr), "%u%%", data->batteryPercent);
+    TFTHelpers::drawText(*tft, 250, 10, battStr, 2, ILI9341_YELLOW, -1);
+
+    // Initial fade display of "Swipe up"
+    uint16_t fadeColor = tft->color565(fadeValue, fadeValue, fadeValue);
+    tft->setTextSize(2);
+    tft->setCursor(55, 260);
+    tft->setTextColor(fadeColor, ILI9341_BLACK);
+    tft->print(F("Swipe up to start"));
+}
+
+void LockScreen::update() {
+
+    // ---- Fade animation for subtle UI motion ----
+    uint16_t fadeColor = tft->color565(fadeValue, fadeValue, fadeValue);
+
+    tft->setTextSize(2);
+    tft->setCursor(55, 260);
+    tft->setTextColor(fadeColor, ILI9341_BLACK);
+    tft->print(F("Swipe up to start"));
+
+    if (fadeDirection) {
+        if (fadeValue < 200) fadeValue += 4;
+        else fadeDirection = false;
+    } else {
+        if (fadeValue > 20) fadeValue -= 4;
+        else fadeDirection = true;
+    }
+}
+*/

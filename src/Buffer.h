@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "IMU.h"   // so we can use imu_vector_t
+#include "IMU_I2C.h"   // so we can use imu_vector_t
 
 
 #ifndef BUFFER_H
@@ -8,8 +8,8 @@
 
 
 // Sampling settings
-#define SAMPLE_RATE_HZ   52      // IMU samples per second
-#define WINDOW_SECONDS   3       // Length of one analysis window
+#define SAMPLE_RATE_HZ 45   // instead of 52
+#define WINDOW_SECONDS 1    // instead of 3
 #define BUFFER_SIZE      (SAMPLE_RATE_HZ * WINDOW_SECONDS)  // Total samples in one window
 
 

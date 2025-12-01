@@ -1,13 +1,22 @@
+/*
+
 #include <Arduino.h>
 #include "DiagnosticScreen.h"
 #include "TFTHelpers.h"
+#include "SignalUIBridge.h"
+
+// ------------------------------------------
+//  OPTIONAL HEADER BAR
+//  Comment this out to remove it
+// ------------------------------------------
+#define SHOW_HEADER_BAR  1
+
 
 DiagnosticScreen::DiagnosticScreen(Adafruit_ILI9341 *tft, UIDataModel *data)
 : tft(tft),
   data(data),
   lastUpdateMs(0)
 {
-    // zero the configs
     memset(&accelPlot, 0, sizeof(accelPlot));
     memset(&fftPlot,   0, sizeof(fftPlot));
 }
@@ -17,58 +26,406 @@ void DiagnosticScreen::enter() {
 }
 
 void DiagnosticScreen::exit() {
-    // nothing yet
+    // nothing needed
 }
 
 void DiagnosticScreen::drawFull() {
+
     TFTHelpers::clear(*tft, ILI9341_BLACK);
 
-    // Top header bar
-    TFTHelpers::drawHeaderBar(*tft, "Diagnostics", ILI9341_DARKGREY, ILI9341_WHITE);
+#if SHOW_HEADER_BAR
+    // OPTIONAL HEADER BAR
+    TFTHelpers::drawHeaderBar(*tft,
+                              "Diagnostics",
+                              ILI9341_DARKGREY,
+                              ILI9341_WHITE);
+    int headerOffset = 30;   // height of header
+#else
+    int headerOffset = 0;    // no header → no vertical shift
+#endif
 
-    // Accel plot (top half)
+    // =====================================
+    // PROCESSED MAG PLOT (HEIGHT = 90)
+    // =====================================
     accelPlot.x = 10;
-    accelPlot.y = 40;
+    accelPlot.y = headerOffset + 10;
     accelPlot.w = tft->width() - 20;
     accelPlot.h = 80;
-    accelPlot.valMin = -2.0f;
-    accelPlot.valMax =  2.0f;
-    accelPlot.bgColor = ILI9341_BLACK;
+
+    accelPlot.valMin = 0.0f;
+    accelPlot.valMax = 50.0f;
+
+    accelPlot.bgColor     = ILI9341_BLACK;
     accelPlot.borderColor = ILI9341_DARKGREY;
-    accelPlot.gridColor = ILI9341_DARKGREY;
+    accelPlot.gridColor   = ILI9341_DARKGREY;
 
     TFTHelpers::initPlot(*tft, accelPlot, 20, 10);
-    TFTHelpers::drawText(*tft, accelPlot.x + 2, accelPlot.y - 12,
-                         "Acceleration (demo)", 1, ILI9341_CYAN, -1);
 
-    // FFT plot (bottom half)
+    TFTHelpers::drawText(*tft,
+                         accelPlot.x + 2,
+                         accelPlot.y - 12,
+                         "Processed Magnitude",
+                         1,
+                         ILI9341_CYAN,
+                         -1);
+
+    // ---- Y-axis label
+    TFTHelpers::drawText(*tft,
+                         accelPlot.x - 5,
+                         accelPlot.y + accelPlot.h/2,
+                         "Mag",
+                         1,
+                         ILI9341_LIGHTGREY,
+                         -1);
+
+    // ---- Time axis labels (0–3 seconds)
+    TFTHelpers::drawText(*tft,
+        accelPlot.x,
+        accelPlot.y + accelPlot.h + 2,
+        "0s", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        accelPlot.x + accelPlot.w/3,
+        accelPlot.y + accelPlot.h + 2,
+        "1s", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        accelPlot.x + (2 * accelPlot.w)/3,
+        accelPlot.y + accelPlot.h + 2,
+        "2s", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        accelPlot.x + accelPlot.w - 18,
+        accelPlot.y + accelPlot.h + 2,
+        "3s", 1, ILI9341_LIGHTGREY, -1);
+
+
+    // =====================================
+    // FFT PEAK PLOT (HEIGHT = 90)
+    // =====================================
     fftPlot.x = 10;
-    fftPlot.y = 140;
+    fftPlot.y = accelPlot.y + accelPlot.h + 35;
     fftPlot.w = tft->width() - 20;
     fftPlot.h = 80;
+
     fftPlot.valMin = 0.0f;
-    fftPlot.valMax = 1.0f;
-    fftPlot.bgColor = ILI9341_BLACK;
+    fftPlot.valMax = 200.0f;
+
+    fftPlot.bgColor     = ILI9341_BLACK;
     fftPlot.borderColor = ILI9341_DARKGREY;
-    fftPlot.gridColor = ILI9341_DARKGREY;
+    fftPlot.gridColor   = ILI9341_DARKGREY;
 
     TFTHelpers::initPlot(*tft, fftPlot, 20, 10);
-    TFTHelpers::drawText(*tft, fftPlot.x + 2, fftPlot.y - 12,
-                         "Spectrum (demo)", 1, ILI9341_CYAN, -1);
+
+    TFTHelpers::drawText(*tft,
+                         fftPlot.x + 2,
+                         fftPlot.y - 12,
+                         "FFT Peak",
+                         1,
+                         ILI9341_CYAN,
+                         -1);
+
+    // ---- Y-axis label
+    TFTHelpers::drawText(*tft,
+                         fftPlot.x - 5,
+                         fftPlot.y + fftPlot.h/2,
+                         "Amp",
+                         1,
+                         ILI9341_LIGHTGREY,
+                         -1);
+
+    // ---- Frequency labels
+    TFTHelpers::drawText(*tft,
+        fftPlot.x,
+        fftPlot.y + fftPlot.h + 2,
+        "0Hz", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        fftPlot.x + fftPlot.w/3,
+        fftPlot.y + fftPlot.h + 2,
+        "5Hz", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        fftPlot.x + (2 * fftPlot.w)/3,
+        fftPlot.y + fftPlot.h + 2,
+        "10Hz", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        fftPlot.x + fftPlot.w - 28,
+        fftPlot.y + fftPlot.h + 2,
+        "15Hz", 1, ILI9341_LIGHTGREY, -1);
+
 
     lastUpdateMs = millis();
 }
 
 void DiagnosticScreen::update() {
-    // update ~every 40 ms
-    if (millis() - lastUpdateMs < 40) return;
+
+    if (millis() - lastUpdateMs < 40)
+        return;
+
     lastUpdateMs = millis();
 
-    // fake accel value: random between -1.5 and +1.5
-    float accelVal = (random(-150, 150)) / 100.0f;
-    TFTHelpers::plotNextSample(*tft, accelPlot, accelVal, ILI9341_GREEN);
+    // ========== PROCESS MAG ==========
+    float mag = SignalUIBridge::getProcessedMagnitude();
+    TFTHelpers::plotNextSample(*tft, accelPlot, mag, ILI9341_GREEN);
 
-    // fake FFT magnitude: random between 0 and 1
-    float fftVal = (random(0, 100)) / 100.0f;
-    TFTHelpers::plotNextSample(*tft, fftPlot, fftVal, ILI9341_YELLOW);
+    // ========== FFT PEAK ==========
+    if (SignalUIBridge::hasNewFFT()) {
+        float peak = SignalUIBridge::getFFTPeak();
+        TFTHelpers::plotNextSample(*tft, fftPlot, peak, ILI9341_YELLOW);
+    }
 }
+*/
+
+
+
+#include <Arduino.h>
+#include "DiagnosticScreen.h"
+#include "TFTHelpers.h"
+#include "SignalUIBridge.h"
+
+// ------------------------------------------
+//  OPTIONAL HEADER BAR
+//  Comment this out to remove it
+// ------------------------------------------
+#define SHOW_HEADER_BAR  1
+
+
+DiagnosticScreen::DiagnosticScreen(Adafruit_ILI9341 *tft, UIDataModel *data)
+: tft(tft),
+  data(data),
+  lastUpdateMs(0)
+{
+    memset(&accelPlot, 0, sizeof(accelPlot));
+    memset(&fftPlot,   0, sizeof(fftPlot));
+}
+
+void DiagnosticScreen::enter() {
+    drawFull();
+}
+
+void DiagnosticScreen::exit() {
+    // nothing needed
+}
+
+void DiagnosticScreen::drawFull() {
+
+    TFTHelpers::clear(*tft, ILI9341_BLACK);
+
+#if SHOW_HEADER_BAR
+    TFTHelpers::drawHeaderBar(*tft,
+                              "Diagnostics",
+                              ILI9341_DARKGREY,
+                              ILI9341_WHITE);
+    int headerOffset = 30;
+#else
+    int headerOffset = 0;
+#endif
+
+    // =====================================
+    // PROCESSED MAG PLOT
+    // =====================================
+    accelPlot.x = 10;
+    accelPlot.y = headerOffset + 10;
+    accelPlot.w = tft->width() - 20;
+    accelPlot.h = 70;
+
+    accelPlot.valMin = 0.0f;
+    accelPlot.valMax = 200.0f;
+
+    accelPlot.bgColor     = ILI9341_BLACK;
+    accelPlot.borderColor = ILI9341_DARKGREY;
+    accelPlot.gridColor   = ILI9341_DARKGREY;
+
+    TFTHelpers::initPlot(*tft, accelPlot, 20, 10);
+
+    TFTHelpers::drawText(*tft,
+        accelPlot.x + 2,
+        accelPlot.y - 12,
+        "Processed Magnitude",
+        1,
+        ILI9341_CYAN,
+        -1);
+
+    TFTHelpers::drawText(*tft,
+        accelPlot.x - 5,
+        accelPlot.y + accelPlot.h/2,
+        "Mag",
+        1,
+        ILI9341_LIGHTGREY,
+        -1);
+
+    TFTHelpers::drawText(*tft,
+        accelPlot.x,
+        accelPlot.y + accelPlot.h + 2,
+        "0s", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        accelPlot.x + accelPlot.w/3,
+        accelPlot.y + accelPlot.h + 2,
+        "30s", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        accelPlot.x + (2 * accelPlot.w)/3,
+        accelPlot.y + accelPlot.h + 2,
+        "60s", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        accelPlot.x + accelPlot.w - 18,
+        accelPlot.y + accelPlot.h + 2,
+        "90s", 1, ILI9341_LIGHTGREY, -1);
+
+
+    // =====================================
+    // FFT SPECTRUM PLOT — NOW 0–10 Hz RANGE
+    // =====================================
+    fftPlot.x = 10;
+    fftPlot.y = accelPlot.y + accelPlot.h + 35;
+    fftPlot.w = tft->width() - 20;
+    fftPlot.h = 70;
+
+    fftPlot.valMin = 0.0f;
+    fftPlot.valMax = 200.0f;
+
+    fftPlot.bgColor     = ILI9341_BLACK;
+    fftPlot.borderColor = ILI9341_DARKGREY;
+    fftPlot.gridColor   = ILI9341_DARKGREY;
+
+    TFTHelpers::initPlot(*tft, fftPlot, 20, 10);
+
+    TFTHelpers::drawText(*tft,
+        fftPlot.x + 2,
+        fftPlot.y - 12,
+        "FFT Spectrum (0–10 Hz)",
+        1,
+        ILI9341_CYAN,
+        -1);
+
+    TFTHelpers::drawText(*tft,
+        fftPlot.x - 5,
+        fftPlot.y + fftPlot.h/2,
+        "Amp",
+        1,
+        ILI9341_LIGHTGREY,
+        -1);
+
+
+    // ---- UPDATED FREQUENCY LABELS (0–10 Hz)
+    TFTHelpers::drawText(*tft,
+        fftPlot.x,
+        fftPlot.y + fftPlot.h + 2,
+        "0Hz", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        fftPlot.x + fftPlot.w/2 - 8,
+        fftPlot.y + fftPlot.h + 2,
+        "5Hz", 1, ILI9341_LIGHTGREY, -1);
+
+    TFTHelpers::drawText(*tft,
+        fftPlot.x + fftPlot.w - 25,
+        fftPlot.y + fftPlot.h + 2,
+        "10Hz", 1, ILI9341_LIGHTGREY, -1);
+
+
+    lastUpdateMs = millis();
+}
+
+/*      !!!!! AUTO SCALING FOR MAGNITUDE PLOT !!!!!  
+void DiagnosticScreen::update() {
+
+    if (millis() - lastUpdateMs < 40)
+        return;
+
+    lastUpdateMs = millis();
+
+    // ==========================================
+    // PROCESS MAGNITUDE (with dynamic Y-scaling)
+    // ==========================================
+    float mag = SignalUIBridge::getProcessedMagnitude();
+
+    // --- Auto-scale Y-axis for magnitude plot ---
+    static float dynMaxMag = 50.0f;          // starting range
+    if (mag > dynMaxMag * 0.90f) {           // if approaching 90% of max
+        dynMaxMag = mag * 1.20f;             // expand range w/ headroom
+        accelPlot.valMax = dynMaxMag;
+
+        // Reinitialize plot area with new scaling
+        TFTHelpers::initPlot(*tft, accelPlot, 20, 10);
+
+        // Redraw label (erased by initPlot)
+        TFTHelpers::drawText(*tft,
+                             accelPlot.x + 2,
+                             accelPlot.y - 12,
+                             "Processed Magnitude",
+                             1,
+                             ILI9341_CYAN,
+                             -1);
+    }
+
+    // Plot magnitude sample smoothly
+    TFTHelpers::plotNextSample(*tft, accelPlot, mag, ILI9341_GREEN);
+
+
+    // ==========================================
+    // FFT SPECTRUM (0–10 Hz bar graph)
+    // ==========================================
+    if (SignalUIBridge::hasNewFFT()) {
+
+        static const uint16_t MAX_FFT_BINS = 64;
+        float spectrum[MAX_FFT_BINS];
+        uint16_t numBins = 0;
+
+        bool ok = SignalUIBridge::getFFTSpectrum(spectrum, MAX_FFT_BINS, numBins);
+        if (ok && numBins > 0) {
+
+            // Draw bars over 0–10 Hz
+            TFTHelpers::drawSpectrumBars(*tft,
+                                         fftPlot,
+                                         spectrum,
+                                         numBins,
+                                         10,       // max freq = 10 Hz
+                                         0.30f);   // y-axis scale factor
+        }
+    }
+}*/
+
+void DiagnosticScreen::update() {
+
+    if (millis() - lastUpdateMs < 40)
+        return;
+
+    lastUpdateMs = millis();
+
+    // ==========================================
+    // PROCESS MAGNITUDE (fixed Y-range)
+    // ==========================================
+    float mag = SignalUIBridge::getProcessedMagnitude();
+
+    // Just plot — fixed accelPlot.valMax from drawFull()
+    TFTHelpers::plotNextSample(*tft, accelPlot, mag, ILI9341_GREEN);
+
+
+    // ==========================================
+    // FFT SPECTRUM (0–10 Hz bar graph)
+    // ==========================================
+    if (SignalUIBridge::hasNewFFT()) {
+
+        static const uint16_t MAX_FFT_BINS = 64;
+        float spectrum[MAX_FFT_BINS];
+        uint16_t numBins = 0;
+
+        bool ok = SignalUIBridge::getFFTSpectrum(spectrum, MAX_FFT_BINS, numBins);
+        if (ok && numBins > 0) {
+
+            // Fixed max freq = 10 Hz, fixed y compression factor = 0.3
+            TFTHelpers::drawSpectrumBars(*tft,
+                                         fftPlot,
+                                         spectrum,
+                                         numBins,
+                                         10,        // 0–10 Hz
+                                         0.3f);     // fixed y scaling
+        }
+    }
+}
+
