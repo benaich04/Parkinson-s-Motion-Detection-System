@@ -45,10 +45,73 @@ Runs a **128-point FFT** on the preprocessed magnitude signal:
 * Outputs the spectrum from **0–26 Hz** (0–64 bins)
 * This will be used to detect tremor (3–5 Hz) and dyskinesia (5–7 Hz)
 
+### **5. Real-Time TFT UI with Touch Navigation**
+
+* TFT screen (ILI9341) integrated with full rendering pipeline
+* Touch gesture engine implemented using ΔX/ΔY analysis
+* **Swipe Up → Diagnostics Screen**
+* Future swipes (Down/Left/Right) reserved for next UI pages
+
+---
+
+### **6. Diagnostics Screen (Technical Mode)**
+
+The swipe-up diagnostics page now displays **two real-time plots**:
+
+#### **a. Processed Magnitude (Time-Domain Plot)**
+
+* Updated in real time using `plotNextSample()`
+* Shows ~3 seconds of smoothed magnitude data
+* Fixed Y-axis (0 → 200 units) for stability
+* Grid + border drawn once, samples streamed efficiently
+
+#### **b. FFT Spectrum (Frequency-Domain Plot)**
+
+* New `drawSpectrumBars()` implementation
+* **1 bar per 1 Hz** for high-resolution visualization
+* Frequency range capped to **0–10 Hz** (optimal for Parkinson’s tremor bands)
+* Uses fixed amplitude scaling (no auto-scaling, no clipping)
+* Updates only when the FFT module signals `fftReady`
+
+This creates a doctor-grade analytical page for observing tremor frequency peaks in real time.
+
+---
+
+### **7. CSV + Python Verification of Preprocessing**
+
+To validate correctness of the microcontroller’s preprocessing pipeline:
+
+* Raw XYZ and MCU-processed magnitudes exported as CSV
+* A Python script recomputes
+
+  * magnitude
+  * DC-offset removal
+  * moving-average smoothing (N=4)
+* Python outputs compared to MCU output
+* Plots confirm **bit-accurate preprocessing**
+
+This ensures the firmware’s data pipeline is mathematically correct.
+
+---
+
+### **8. RAM Optimization & Memory Issue Fixes**
+
+The ATmega32U4 has only **2.5 KB of RAM**, causing issues with:
+
+* `BUFFER_SIZE` (defined by `SAMPLE_RATE_HZ × WINDOW_SECONDS`)
+* `FFT_SIZE` array allocation
+
+Fixes applied:
+
+* Preprocessed data is now written **directly into FFT input buffer**
+* Removed temporary intermediate buffers
+* Reduced large local arrays inside functions
+* Ensured FFT arrays stay static and minimal
+* Confirmed stable RAM usage during UI rendering + FFT execution
+
+
 ###  System Now Processes:
-
-IMU → Buffer → Magnitude → Mean Removal → Smoothing → FFT Spectrum
-
+IMU → Buffer → Magnitude → Mean Removal → Smoothing → FFT Spectrum → UIManager → Real-Time TFT UI (Processed Magnitude Plot + 0–10 Hz FFT Bar Spectrum + Touch Swipe Navigation)
 ---
 
 #  **File Overview**
