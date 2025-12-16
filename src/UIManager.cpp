@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include "UIManager.h"
 
+//this file implements the UIManager class, which handles screen management and touch gestures
+//swipe gestures are mapped to screen transitions : up->Diagnostic, down->Lock, left->Patient, right->History
+
 UIManager::UIManager(TFTHelpers::ILI9341_Display* tft, UIDataModel* data): 
   tft(tft),
   data(data),

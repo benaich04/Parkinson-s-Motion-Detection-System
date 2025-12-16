@@ -29,7 +29,7 @@ private:
     int8_t  heartOffset;
     bool    heartGoingUp;
     
-    // FIX: Variable to track the heart's vertical position from the previous frame.
+    //Variable to track the heart's vertical position from the previous frame.
     int16_t previousHeartY; 
 
     void drawHeart();   // draw one frame of heart

@@ -1,7 +1,11 @@
 #ifndef UIDATAMODEL_H
 #define UIDATAMODEL_H
 
-#include <stdint.h>   // <— REQUIRED for uint8_t, uint16_t, etc.
+#include <stdint.h>   
+
+//this is the data model that holds all the UI relevant data
+//it is read and written by various parts of the program
+
 
 struct UIDataModel {
 

@@ -22,7 +22,6 @@ int lastTouchY = 0;
 UIDataModel::MovementState lastState = UIDataModel::STABLE;
 
 void setup() {
-    // No Serial.begin to save Flash memory
 
     // 1. TFT
     tft.begin();
@@ -35,7 +34,7 @@ void setup() {
     ui.begin();
 
     // 4. INTERNAL SIGNAL LOGIC
-    // CRITICAL FIX: Pass the &data pointer so signals can write to the UI Model
+    //Pass the &data pointer so signals can write to the UI Model
     SignalUIBridge::begin(&data);
 }
 

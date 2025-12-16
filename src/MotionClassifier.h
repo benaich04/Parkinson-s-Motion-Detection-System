@@ -4,10 +4,6 @@
 #include <Arduino.h>
 #include "FFTModule.h"
 
-// --------------------------------------------------
-// Configuration
-// --------------------------------------------------
-
 // Length of analysis window (ms)
 // NOTE: Affects absolute energy magnitude (thresholds must scale accordingly)
 #define ACCUMULATION_TIME_MS   5000
@@ -17,9 +13,7 @@
 // FFT_SIZE must be defined elsewhere (e.g., SignalProcessor / FFT module)
 #define NUM_SPECTRUM_BINS      ((FFT_SIZE / 2) + 1)
 
-// --------------------------------------------------
 // Motion States
-// --------------------------------------------------
 enum MotionState {
     NORMAL,        // No pathological motion detected
     TREMOR,        // Tremor energy (3–5 Hz) dominant

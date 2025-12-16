@@ -2,8 +2,6 @@
 #include <Arduino.h>
 #include "IMU.h"
 
-
-
 //Initialize the IMU sensor
 uint8_t IMU_init() {
     SPI.begin();

@@ -1,15 +1,8 @@
-
-
-
 #include <Arduino.h>
 #include "DiagnosticScreen.h"
 #include "TFTHelpers.h"
 #include "SignalUIBridge.h"
 
-// ------------------------------------------
-//  OPTIONAL HEADER BAR
-//  Comment this out to remove it
-// ------------------------------------------
 #define SHOW_HEADER_BAR  1
 
 
@@ -27,7 +20,7 @@ void DiagnosticScreen::enter() {
 }
 
 void DiagnosticScreen::exit() {
-    // nothing needed
+   
 }
 
 void DiagnosticScreen::drawFull() {
@@ -44,9 +37,8 @@ void DiagnosticScreen::drawFull() {
     int headerOffset = 0;
 #endif
 
-    // =====================================
+    
     // PROCESSED MAG PLOT
-    // =====================================
     accelPlot.x = 10;
     accelPlot.y = headerOffset + 10;
     accelPlot.w = tft->width() - 20;
@@ -97,10 +89,7 @@ void DiagnosticScreen::drawFull() {
         accelPlot.y + accelPlot.h + 2,
         "90S", 1, ILI9341_LIGHTGREY, -1);
 
-
-    // =====================================
     // FFT SPECTRUM PLOT — NOW 0–10 Hz RANGE
-    // =====================================
     fftPlot.x = 10;
     fftPlot.y = accelPlot.y + accelPlot.h + 35;
     fftPlot.w = tft->width() - 20;
@@ -152,7 +141,6 @@ void DiagnosticScreen::drawFull() {
     lastUpdateMs = millis();
 }
 
-/*      !!!!! AUTO SCALING FOR MAGNITUDE PLOT !!!!!  
 void DiagnosticScreen::update() {
 
     if (millis() - lastUpdateMs < 40)
@@ -160,76 +148,16 @@ void DiagnosticScreen::update() {
 
     lastUpdateMs = millis();
 
-    // ==========================================
-    // PROCESS MAGNITUDE (with dynamic Y-scaling)
-    // ==========================================
-    float mag = SignalUIBridge::getProcessedMagnitude();
-
-    // --- Auto-scale Y-axis for magnitude plot ---
-    static float dynMaxMag = 50.0f;          // starting range
-    if (mag > dynMaxMag * 0.90f) {           // if approaching 90% of max
-        dynMaxMag = mag * 1.20f;             // expand range w/ headroom
-        accelPlot.valMax = dynMaxMag;
-
-        // Reinitialize plot area with new scaling
-        TFTHelpers::initPlot(*tft, accelPlot, 20, 10);
-
-        // Redraw label (erased by initPlot)
-        TFTHelpers::drawText(*tft,
-                             accelPlot.x + 2,
-                             accelPlot.y - 12,
-                             "Processed Magnitude",
-                             1,
-                             ILI9341_CYAN,
-                             -1);
-    }
-
-    // Plot magnitude sample smoothly
-    TFTHelpers::plotNextSample(*tft, accelPlot, mag, ILI9341_GREEN);
-
-
-    // ==========================================
-    // FFT SPECTRUM (0–10 Hz bar graph)
-    // ==========================================
-    if (SignalUIBridge::hasNewFFT()) {
-
-        static const uint16_t MAX_FFT_BINS = 64;
-        float spectrum[MAX_FFT_BINS];
-        uint16_t numBins = 0;
-
-        bool ok = SignalUIBridge::getFFTSpectrum(spectrum, MAX_FFT_BINS, numBins);
-        if (ok && numBins > 0) {
-
-            // Draw bars over 0–10 Hz
-            TFTHelpers::drawSpectrumBars(*tft,
-                                         fftPlot,
-                                         spectrum,
-                                         numBins,
-                                         10,       // max freq = 10 Hz
-                                         0.30f);   // y-axis scale factor
-        }
-    }
-}*/
-
-void DiagnosticScreen::update() {
-
-    if (millis() - lastUpdateMs < 40)
-        return;
-
-    lastUpdateMs = millis();
-
-    // ==========================================
+    
     // PROCESS MAGNITUDE (fixed Y-range)
-    // ==========================================
     float mag = SignalUIBridge::getProcessedMagnitude();
 
     // Just plot — fixed accelPlot.valMax from drawFull()
     TFTHelpers::plotNextSample(*tft, accelPlot, mag, ILI9341_GREEN);
 
 
-    // ==========================================
+    
     // FFT SPECTRUM (0–10 Hz bar graph)
-    // ==========================================
     if (SignalUIBridge::hasNewFFT()) {
 
         static const uint16_t MAX_FFT_BINS = 64;

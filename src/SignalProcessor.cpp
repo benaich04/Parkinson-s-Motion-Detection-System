@@ -3,13 +3,12 @@
 SignalProcessor::SignalProcessor()
 : spectrumBins((FFT_SIZE / 2) + 1)
 {
-    // Nothing else here; real init happens in begin()
+   
 }
 
 void SignalProcessor::begin() {
     imuBuffer_init(&imuBuffer);
 
-    // Optional: clear arrays
     for (uint16_t i = 0; i < BUFFER_SIZE; i++) {
         windowSamples[i].x = 0;
         windowSamples[i].y = 0;

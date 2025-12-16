@@ -257,6 +257,6 @@ namespace TFTHelpers {
     return ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
   }
 
-} // namespace TFTHelpers
+} 
 
 #endif // TFT_HELPERS_H

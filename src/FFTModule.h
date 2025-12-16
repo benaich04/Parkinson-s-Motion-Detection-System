@@ -9,7 +9,7 @@
 
 //must be a power of 2, since our signal will have 156 data points
 //we can use 128 or 256, but 128 is faster
-#define FFT_SIZE 32   //number of samples for FFT, must be a power of 2 : set it to 16 for RAM test instead of 64
+#define FFT_SIZE 32   //number of samples for FFT, must be a power of 2 : set it to 32 for RAM test instead of 64
 #define SAMPLING_FREQUENCY 52 // in Hz
 
 // Function to compute the FFT spectrum

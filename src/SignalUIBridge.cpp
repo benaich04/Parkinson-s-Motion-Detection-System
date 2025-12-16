@@ -116,14 +116,6 @@ void SignalUIBridge::update() {
 
         MotionState newState = motionClassifier.getClassification();
 
-        // --- UPDATE HISTORY COUNTS ---
-        // if (uiData != nullptr) {
-        //     // Detect transition from Normal -> Tremor to count "Events"
-        //     if (currentMotionState == NORMAL && newState == TREMOR) {
-        //         uiData->tremorEventsToday++;
-        //     }
-        // }
-
         // --- SYNC STATE TO DATA MODEL ---
         if (uiData != nullptr) {
             switch (newState) {

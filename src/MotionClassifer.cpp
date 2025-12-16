@@ -84,11 +84,8 @@ void MotionClassifier::getEnergyRatios(float &tremorRatio,
 // Internal classification logic
 // --------------------------------------------------
 MotionState MotionClassifier::classify() {
-
-    // --------------------------------------------------
     // Band definitions (BIN INDICES, not Hz)
     // Assumes Fs / FFT_SIZE ≈ 1 Hz
-    // --------------------------------------------------
     const uint16_t TREMOR_START = 3;   // 3 Hz
     const uint16_t TREMOR_END   = 5;   // [3,5)
     const uint16_t DYSK_START   = 5;   // 5 Hz
@@ -110,9 +107,8 @@ MotionState MotionClassifier::classify() {
             E_dysk += e;
     }
 
-    // --------------------------------------------------
+
     // Store energies for printing / tuning
-    // --------------------------------------------------
     lastE_tremor = E_tremor;
     lastE_dysk   = E_dysk;
     lastE_total  = E_total;
@@ -128,18 +124,15 @@ MotionState MotionClassifier::classify() {
     lastTremorRatio = E_tremor / E_total;
     lastDyskRatio   = E_dysk   / E_total;
 
-    // --------------------------------------------------
     // Absolute energy thresholds (YOU TUNE THESE)
-    // --------------------------------------------------
     const float TREMOR_ENERGY_THRESH = 80000.0f;
     const float DYSK_ENERGY_THRESH   = 70000.0f;
 
     bool tremorDetected = (E_tremor > TREMOR_ENERGY_THRESH);
     bool dyskDetected   = (E_dysk   > DYSK_ENERGY_THRESH);
 
-    // --------------------------------------------------
+
     // Primary decision logic
-    // --------------------------------------------------
     if (!tremorDetected && !dyskDetected)
         return NORMAL;
 
@@ -155,7 +148,7 @@ MotionState MotionClassifier::classify() {
     // --------------------------------------------------
     float ratio = E_tremor / (E_dysk + 1e-6f);
 
-    //!!!!!!!!!!
+    // Bias ratio threshold (TUNABLE)
     const float DYSK_BIAS_RATIO = 2.0f;   // 1.2–1.5 typical
 
     if (ratio < DYSK_BIAS_RATIO)

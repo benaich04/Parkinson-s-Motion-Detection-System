@@ -11,7 +11,7 @@ LockScreen::LockScreen(TFTHelpers::ILI9341_Display* tft, UIDataModel* data)
   heartBaseY(150),
   heartOffset(0),
   heartGoingUp(true),
-  previousHeartY(150) // <--- INITIALIZE previousHeartY
+  previousHeartY(150) 
 {}
 
 void LockScreen::enter() {
@@ -20,7 +20,7 @@ void LockScreen::enter() {
 }
 
 void LockScreen::exit() {
-    // nothing yet
+
 }
 
 void LockScreen::drawFull() {

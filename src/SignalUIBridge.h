@@ -1,36 +1,9 @@
-/*
 #ifndef SIGNAL_UI_BRIDGE_H
 #define SIGNAL_UI_BRIDGE_H
 
 #include <Arduino.h>
-#include "FFTModule.h"
-
-class SignalUIBridge {
-public:
-    static void begin();
-    static void update();
-
-    // getters for DiagnosticScreen
-    static float  getProcessedMagnitude();
-    static bool   hasNewFFT();
-    static float  getFFTPeak();
-
-private:
-    static float latestMag;
-    static bool  fftReady;
-    static float fftPeak;
-};
-
-#endif
-*/
-
-
-#ifndef SIGNAL_UI_BRIDGE_H
-#define SIGNAL_UI_BRIDGE_H
-
-#include <Arduino.h>
-#include "UIDataModel.h"      // <--- Required for UIDataModel*
-#include "MotionClassifier.h" // <--- Required for MotionState enum
+#include "UIDataModel.h"      
+#include "MotionClassifier.h" 
 
 // Ensure FFT_SIZE matches your SignalProcessor settings (usually 128)
 #ifndef FFT_SIZE

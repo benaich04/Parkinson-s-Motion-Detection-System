@@ -5,8 +5,8 @@
 #include "UIDataModel.h"
 #include "LockScreen.h"
 #include "DiagnosticScreen.h"
-#include "PatientScreen.h"  // Added
-#include "HistoryScreen.h"  // Added
+#include "PatientScreen.h"  
+#include "HistoryScreen.h"  
 #include <Adafruit_ILI9341.h>
 
 class UIManager {
@@ -18,7 +18,7 @@ public:
 
     // gesture handlers (swipe)
     void onSwipeUp();
-    void onSwipeDown(); // Added missing handler
+    void onSwipeDown(); 
     void onSwipeLeft();
     void onSwipeRight();
 

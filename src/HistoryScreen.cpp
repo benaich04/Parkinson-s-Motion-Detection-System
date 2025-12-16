@@ -1,6 +1,3 @@
-// ========================================
-// HistoryScreen.cpp - Minimal
-// ========================================
 #include <Arduino.h>
 #include "HistoryScreen.h"
 
@@ -25,14 +22,14 @@ void HistoryScreen::drawFull() {
     tft->fillRect(5, 32, 100, 35, ILI9341_NAVY);
     tft->drawRect(5, 32, 100, 35, ILI9341_CYAN);
     TFTHelpers::drawText(*tft, 10, 36, "TOT", 1, ILI9341_LIGHTGREY);
-    itoa(tCnt + dCnt, b, 10);  // FIXED - use local counts
+    itoa(tCnt + dCnt, b, 10);  
     TFTHelpers::drawText(*tft, 45, 48, b, 2, ILI9341_WHITE);
     
     // Tremors
     tft->fillRect(110, 32, 100, 35, ILI9341_NAVY);
     tft->drawRect(110, 32, 100, 35, ILI9341_ORANGE);
     TFTHelpers::drawText(*tft, 115, 36, "TRM", 1, ILI9341_LIGHTGREY);
-    itoa(tCnt, b, 10);  // FIXED - use local tremor count
+    itoa(tCnt, b, 10); 
     TFTHelpers::drawText(*tft, 150, 48, b, 2, ILI9341_ORANGE);
     
     // Dysk
@@ -90,8 +87,6 @@ void HistoryScreen::drawFull() {
 }
 
 void HistoryScreen::update() {
-    // Events are now captured from main loop
-    // This can remain empty or handle screen-specific updates
 }
 
 void HistoryScreen::captureEvent() {

@@ -67,12 +67,11 @@ void PatientScreen::drawFull() {
 
     cx = tft->width() / 2;
     
-    // ADJUSTMENT: Moved text higher
     textY   = 40; 
     
     // Circle centered below text
     cy      = textY + 85; 
-    baseR   = 40; // Slightly larger base circle
+    baseR   = 40; 
     
     adviceY = tft->height() - 46;
 

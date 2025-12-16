@@ -16,8 +16,6 @@
 class SignalProcessor {
 public:
     SignalProcessor();
-
-    // Call once in setup()
     void begin();
 
     // Call this every time you read a new IMU sample.
