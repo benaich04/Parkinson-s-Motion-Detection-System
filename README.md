@@ -1,5 +1,8 @@
 #  **Parkinson’s Movement Detection – Backend Firmware (ATmega32U4)**
 
+
+
+
 This project implements the **backend processing pipeline** for a wearable device that detects **tremor**, **dyskinesia**, and later **gait abnormalities** using an accelerometer on an ATmega32U4 microcontroller.
 
 The backend is modular and follows the exact structure planned for the full system:
